@@ -1,65 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
-import * as Location from 'expo-location';
-
-interface LocationObject {
-  coords: {
-    latitude: number;
-    longitude: number;
-  };
-}
+import React from 'react';
+import { View, Switch, Text, StyleSheet } from 'react-native';
+import { useThemeColorStore } from '../../store/ThemeColorStore';
 
 export default function TabOneScreen() {
-  const [location, setLocation] = useState<LocationObject | null>(null);
 
-  useEffect(() => {
-    // Função assíncrona para obter a permissão de localização e a localização atual
-    const getLocation = async () => {
-      try {
-        // Solicitar permissão de localização
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permissão de localização não concedida');
-          return;
-        }
+  const {
+    isDarkMode,
+    toggleThemeColor,
+  } = useThemeColorStore();
 
-        // Obter a localização atual
-        const currentLocation = await Location.getCurrentPositionAsync({});
-        setLocation(currentLocation);
-      } catch (error) {
-        console.error('Erro ao obter a localização:', error);
-      }
-    };
+  const toggleTheme = () => {
+    toggleThemeColor()
+  };
 
-    // Chamar a função para obter a localização ao montar o componente
-    getLocation();
-  }, []);
+
 
   return (
-    <View style={styles.container}>
-      {location ? (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-        >
-          <Marker
-            coordinate={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            }}
-            title="Sua localização"
-            description="Você está aqui!"
-          />
-        </MapView>
-      ) : (
-        <Text>Carregando...</Text>
-      )}
+    <View style={[styles.container, { backgroundColor: isDarkMode ? styles.darkContainer.backgroundColor : styles.lightContainer.backgroundColor }]}>
+      <View style={styles.themeToggleContainer}>
+        <Text style={[styles.themeText, { color: isDarkMode ? styles.darkThemeText.color : styles.lightThemeText.color }]}>
+          Toggle Theme
+        </Text>
+        <Switch value={isDarkMode} onValueChange={toggleTheme} />
+
+      </View>
     </View>
   );
 }
@@ -67,11 +31,27 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  themeToggleContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  map: {
-    width: '100%',
-    height: '100%',
+  themeText: {
+    fontSize: 20,
+  },
+  lightContainer: {
+    backgroundColor: '#f3f3f3',
+  },
+  darkContainer: {
+    backgroundColor: '#242c40',
+  },
+  lightThemeText: {
+    color: '#242c40',
+  },
+  darkThemeText: {
+    color: '#f3f3f3',
   },
 });
